@@ -11,9 +11,19 @@ Before running any Gulp tasks:
 3. Run `npm install` in the root directory (this will install bower dependencies too)
 4. For livereload functionality, install the [livereload Chrome extension](https://chrome.google.com/webstore/detail/livereload/jnihajbhpnppcggbcgedagnkighmdlei)
 
+## Project Structure
+
 ## Gulp Tasks
 
-All of these are available from the command line:
+All of these are available from the command line.
+
+### Essential ones
+
+__`gulp watch-dev`__ Clean, build, and watch live changes to the dev environment.
+
+__`gulp`__ Default task builds for prod.
+
+### Sub-tasks
 
 __`gulp validate-partials`__ Checks html source files for syntax errors.
 
@@ -51,8 +61,4 @@ __`gulp clean-build-app-dev`__ Cleans and builds a complete dev environment.
 
 __`gulp clean-build-app-prod`__ Cleans and builds a complete prod environment.
 
-__`gulp watch-dev`__ Clean, build, and watch live changes to the dev environment.
-
 __`gulp watch-prod`__ Clean, build, and watch live changes to the prod environment.
-
-__`gulp`__ Default task builds for prod.
