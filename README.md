@@ -1,4 +1,6 @@
-This repository is a starting point for AngularJS projects using the [Gulp](http://gulpjs.com/) streaming build system. Almost everything important is in `gulpfile.js`. For a full discussion of the setup, please refer to the companion [blog post](http://paislee.io/a-healthy-gulp-setup-for-angularjs-projects).
+This project is a starting point for AngularJS projects using the [Gulp](http://gulpjs.com/) streaming build system. Almost everything important is in [gulpfile.js](https://github.com/paislee/healthy-gulp-angular/blob/master/gulpfile.js).
+
+For a full discussion of the setup, please refer to the companion [blog post](http://paislee.io/a-healthy-gulp-setup-for-angularjs-projects).
 
 ## Installation
 
@@ -7,132 +9,50 @@ Before running any Gulp tasks:
 1. Check out this repository
 2. Ensure you have node installed
 3. Run `npm install` in the root directory (this will install bower dependencies too)
+4. For livereload functionality, install the [livereload Chrome extension](https://chrome.google.com/webstore/detail/livereload/jnihajbhpnppcggbcgedagnkighmdlei)
 
 ## Gulp Tasks
 
-// clean
-gulp.task('clean-dev', function() {
-    var deferred = Q.defer();
-    del(paths.distDev, function() {
-        deferred.resolve();
-    });
-    return deferred.promise;
-});
-gulp.task('clean-prod', function() {
-    var deferred = Q.defer();
-    del(paths.distProd, function() {
-        deferred.resolve();
-    });
-    return deferred.promise;
-});
+All of these are available from the command line:
 
-// check partials
-gulp.task('validate-partials', pipes.validatedPartials);
+__`gulp validate-partials`__ Checks html source files for syntax errors.
 
-// build partials
-gulp.task('build-partials-dev', pipes.builtPartialsDev);
-gulp.task('convert-partials-to-js', pipes.scriptedPartials);
+__`gulp validate-index`__ Checks index.html for syntax errors.
 
-// check devserver scripts
-gulp.task('validate-devserver-scripts', pipes.validatedDevServerScripts);
+__`gulp build-partials-dev`__ Moves html source files into the dev environment.
 
-// check app scripts
-gulp.task('validate-app-scripts', pipes.validatedAppScripts);
+__`gulp convert-partials-to-js`__ Converts partials to javascript using html2js.
 
-// build app scripts
-gulp.task('build-app-scripts-dev', pipes.builtAppScriptsDev);
-gulp.task('build-app-scripts-prod', pipes.builtAppScriptsProd);
+__`gulp validate-devserver-scripts`__ Runs jshint on the dev server scripts.
 
-// build styles
-gulp.task('build-styles-dev', pipes.builtStylesDev);
-gulp.task('build-styles-prod', pipes.builtStylesProd);
+__`gulp validate-app-scripts`__ Runs jshint on the app scripts.
 
-// build vendor scripts
-gulp.task('build-vendor-scripts-dev', pipes.builtVendorScriptsDev);
-gulp.task('build-vendor-scripts-prod', pipes.builtVendorScriptsProd);
+__`gulp build-app-scripts-dev`__ Moves app scripts into the dev environment.
 
-// build index
-gulp.task('build-index-dev', pipes.builtIndexDev);
-gulp.task('build-index-prod', pipes.builtIndexProd);
+__`gulp build-app-scripts-prod`__ Concatenates, uglifies, and moves app scripts and partials into the prod environment.
 
-// build everything
-gulp.task('build-app-dev', pipes.builtAppDev);
-gulp.task('build-app-prod', pipes.builtAppProd);
+__`gulp build-styles-dev`__ Compiles app sass and moves to the dev environment.
 
-// clean and build everything
-gulp.task('clean-build-app-dev', ['clean-dev'], pipes.builtAppDev);
-gulp.task('clean-build-app-prod', ['clean-prod'], pipes.builtAppProd);
+__`gulp build-styles-prod`__ Compiles and minifies app sass to css and moves to the prod environment.
 
-// watch changes in dev mode
-gulp.task('watch-dev', ['clean-build-app-dev'], function() {
+__`gulp build-vendor-scripts-dev`__ Moves vendor scripts into the dev environment.
 
-    // start nodemon to auto-reload the dev server
-    plugins.nodemon({ script: 'server.js', ext: 'js', watch: ['devServer/'], env: {NODE_ENV : 'development'} })
-        .on('change', ['jshint-devserver'])
-        .on('restart', function () {
-            console.log('[nodemon] restarted dev server');
-        });
+__`gulp build-vendor-scripts-prod`__ Concatenates, uglifies, and moves vendor scripts into the prod environment.
 
-    // start live-reload server
-    plugins.livereload.listen({ start: true });
+__`gulp build-index-dev`__ Validates and injects sources into index.html and moves it to the dev environment.
 
-    gulp.watch(paths.scripts, function() {
-        return pipes.builtAppScriptsDev()
-            .pipe(plugins.livereload());
-    });
+__`gulp build-index-prod`__ Validates and injects sources into index.html, minifies and moves it to the dev environment.
 
-    gulp.watch(paths.index, function() {
-        return pipes.builtIndexDev()
-            .pipe(plugins.livereload());
-    });
+__`gulp build-app-dev`__ Builds a complete dev environment.
 
-    gulp.watch(paths.partials, function() {
-        return pipes.builtPartialsDev()
-            .pipe(plugins.livereload());
-    });
+__`gulp build-app-prod`__ Builds a complete prod environment.
 
-    gulp.watch(paths.styles, function() {
-        return pipes.builtStylesDev()
-            .pipe(plugins.livereload());
-    });
+__`gulp clean-build-app-dev`__ Cleans and builds a complete dev environment.
 
-});
+__`gulp clean-build-app-prod`__ Cleans and builds a complete prod environment.
 
-// watch changes in production mode
-gulp.task('watch-prod', ['clean-build-app-prod'], function() {
+__`gulp watch-dev`__ Clean, build, and watch live changes to the dev environment.
 
-    // start nodemon to auto-reload the dev server
-    plugins.nodemon({ script: 'server.js', ext: 'js', watch: ['devServer/'], env: {NODE_ENV : 'production'} })
-        .on('change', ['jshint-devserver'])
-        .on('restart', function () {
-            console.log('[nodemon] restarted dev server');
-        });
+__`gulp watch-prod`__ Clean, build, and watch live changes to the prod environment.
 
-    // start live-reload server
-    plugins.livereload.listen({start: true});
-
-    gulp.watch(paths.scripts, function() {
-        return pipes.builtAppScriptsProd()
-            .pipe(plugins.livereload());
-    });
-
-    gulp.watch(paths.index, function() {
-        return pipes.builtIndexProd()
-            .pipe(plugins.livereload());
-    });
-
-    gulp.watch(paths.partials, function() {
-        return pipes.builtAppScriptsProd()
-            .pipe(plugins.livereload());
-    });
-
-    gulp.watch(paths.styles, function() {
-        return pipes.builtStylesProd()
-            .pipe(plugins.livereload());
-    });
-});
-
-// default task builds for prod
-gulp.task('default', ['clean-prod'], pipes.builtAppProd);
-
-## Additional commands
+__`gulp`__ Default task builds for prod.
