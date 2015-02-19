@@ -95,10 +95,25 @@ Sources built for development. Styles are compiled to CSS. Everything else from 
     |---- app.js
     |
     |---- index.html
-    
+
 ### /dist.prod
 
 Sources built for production. Everything is validated, things are concatenated and uglified. HTML partials are pre-loaded into the angular template cache with gulp-ng-html2js.
+
+    /dist.prod
+    |
+    |---- /scripts
+    |     |
+    |     |---- app.min.js
+    |     |---- vendor.min.js
+    |
+    |---- /styles
+    |     |
+    |     |---- app.min.css
+    |
+    |---- index.html
+    
+Pretty self-explanatory.
 
 ## Gulp Tasks
 
@@ -108,7 +123,8 @@ All of the following are available from the command line.
 
 These tasks I use as part of my regular developments and deploy scripts:
 
-- __`gulp watch-dev`__ Clean, build, and watch live changes to the dev environment. Supports livereload. Built sources are served directly by the dev server from /dist.dev.
+- __`gulp watch-dev`__ Clean, build, and watch live changes to the dev environment. Built sources are served directly by the dev server from /dist.dev.
+- __`gulp watch-prod`__ Clean, build, and watch live changes to the prod environment. Built sources are served directly by the dev server from /dist.prod.
 - __`gulp`__ Default task builds for prod. Built sources are put into /dist.prod, and can be served directly.
 
 ### Sub-tasks
@@ -146,7 +162,3 @@ __Everything__
 - __`gulp build-app-prod`__ Builds a complete prod environment.
 - __`gulp clean-build-app-dev`__ Cleans and builds a complete dev environment.
 - __`gulp clean-build-app-prod`__ Cleans and builds a complete prod environment.
-
-__Watch__
-
-- __`gulp watch-prod`__ Clean, build, and watch live changes to the prod environment.
