@@ -13,6 +13,35 @@ Before running any Gulp tasks:
 
 ## Project Structure
 
+The project has a directory structure like:
+
+    /healthy-gulp-angular
+    |
+    |---- /app
+    |     |
+    |     |---- index.html
+    |     |---- app.js
+    |     |
+    |     |---- /styles
+    |     |     |
+    |     |     |---- _settings.scss
+    |     |     |---- app.scss
+    |     |
+    |     |---- /components
+    |           |
+    |           ...
+    |
+    |---- server.js
+    |
+    |---- /devServer
+    |     |
+    |     |---- ...
+    |
+    |---- /dist.dev (*)
+    |
+    |---- /dist.prod (*)
+
+
 ## Gulp Tasks
 
 All of these are available from the command line.
