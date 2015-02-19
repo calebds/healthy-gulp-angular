@@ -34,31 +34,71 @@ The project has a directory structure like:
     |---- server.js
     |
     |---- /devServer
-          |
-          |---- ...
+    |     |
+    |     |---- ...
+    |
+    |---- (/dist.dev)
+    |
+    |---- (/dist.prod)
     
 
 Let's break this down..
 
-#### /app
+#### [/app](https://github.com/paislee/healthy-gulp-angular/blob/master/app)
 
 All first-party application source code lives here, including HTML, scripts, and styles of whatever flavor.
 
 #### [/app/index.html](https://github.com/paislee/healthy-gulp-angular/blob/master/app/index.html)
 
-The single page app "shell page". Adapted from [Angular Seed](https://github.com/angular/angular-seed/blob/master/app/index.html).
+The single page app "shell page". Adapted from [Angular Seed](https://github.com/angular/angular-seed/blob/master/app/index.html). All sources are automatically wired in with gulp-inject.
 
-#### /app/app.js
+#### [/app/app.js](https://github.com/paislee/healthy-gulp-angular/blob/master/app/app.js)
 
-#### /app/styles
+The app's main angular module is defined here. This file is always loaded first with gulp-angular-filesort.
 
-#### /app/components
+#### [/app/components](https://github.com/paislee/healthy-gulp-angular/blob/master/app/components)
 
-#### server.js
+I like to group my angular scripts by comonent. Each sub-directory here typically contains a directive and a matching html partial.
 
-#### /devServer
+#### [/app/styles](https://github.com/paislee/healthy-gulp-angular/blob/master/app/styles)
 
-### "Compiled" sources
+Custom app styles (I use SASS) live here. There's also a foundation settings file.
+
+#### [server.js](https://github.com/paislee/healthy-gulp-angular/blob/master/server.js)
+
+This is the entrypoint for the ExpressJS development server. It respects the environment variable `NODE_ENV`, taking its value as the directory out of which to serve static resources. It defaults to `dist.dev` to serve development files, and also accepts `dist.prod` to serve the production files.
+
+#### [/devServer](https://github.com/paislee/healthy-gulp-angular/blob/master/devServer)
+
+The scripts for the development server. I'll typically put mock API responses in here.
+
+### Processed Sources
+
+The gulp tasks listed below deal with taking sources from /app and "compiling" them for either development or production. `*-dev` tasks will output to /dist.dev, and `*-prod` will output to /dist.prod. Here's an overview of the directory structures for each:
+
+### /dist.dev
+
+Sources built for development. Styles are compiled to CSS. Everything else from /app is validated and moved directly in here. Nothing is concatenated, uglified, or minified. Vendor scripts are moved in as well.
+
+    /dist.dev
+    |
+    |---- /bower_components
+    |
+    |---- /components
+    |     |
+    |     ...
+    |
+    |---- /styles
+    |     |
+    |     ...
+    |
+    |---- app.js
+    |
+    |---- index.html
+    
+### /dist.prod
+
+Sources built for production. Everything is validated, things are concatenated and uglified. HTML partials are pre-loaded into the angular template cache with gulp-ng-html2js.
 
 ## Gulp Tasks
 
@@ -68,8 +108,8 @@ All of the following are available from the command line.
 
 These tasks I use as part of my regular developments and deploy scripts:
 
-- __`gulp watch-dev`__ Clean, build, and watch live changes to the dev environment.
-- __`gulp`__ Default task builds for prod.
+- __`gulp watch-dev`__ Clean, build, and watch live changes to the dev environment. Supports livereload. Built sources are served directly by the dev server from /dist.dev.
+- __`gulp`__ Default task builds for prod. Built sources are put into /dist.prod, and can be served directly.
 
 ### Sub-tasks
 
