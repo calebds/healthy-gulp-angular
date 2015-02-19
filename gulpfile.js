@@ -15,6 +15,7 @@ var paths = {
     partials: ['app/**/*.html', '!app/index.html'],
     distDev: './dist.dev',
     distProd: './dist.prod',
+    distScriptsProd: './dist.prod/scripts',
     scriptsDevServer: 'devServer/**/*.js'
 };
 
@@ -57,7 +58,7 @@ pipes.builtAppScriptsProd = function() {
             .pipe(plugins.concat('app.min.js'))
             //.pipe(plugins.uglify())
         .pipe(plugins.sourcemaps.write())
-        .pipe(gulp.dest(paths.distProd));
+        .pipe(gulp.dest(paths.distScriptsProd));
 };
 
 pipes.builtVendorScriptsDev = function() {
@@ -71,7 +72,7 @@ pipes.builtVendorScriptsProd = function() {
         .pipe(pipes.orderVendorScripts())
         .pipe(plugins.concat('vendor.min.js'))
         .pipe(plugins.uglify())
-        .pipe(gulp.dest(paths.distProd));
+        .pipe(gulp.dest(paths.distScriptsProd));
 };
 
 pipes.validatedDevServerScripts = function() {
