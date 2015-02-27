@@ -13,9 +13,15 @@ Before running any Gulp tasks:
 
 ## Project Structure
 
-The project has a directory structure like:
+The project ships with a directory structure like:
 
     /healthy-gulp-angular
+    |
+    |---- package.json
+    |
+    |---- bower.json
+    |
+    |---- gulpfile.js
     |
     |---- /app
     |     |
@@ -42,7 +48,19 @@ The project has a directory structure like:
     |---- (/dist.prod)
     
 
-Let's break this down..
+__Let's break this down..__
+
+#### [package.json](https://github.com/paislee/healthy-gulp-angular/blob/master/package.json)
+
+Server-side (command-line) dependencies.
+
+#### [bower.json](https://github.com/paislee/healthy-gulp-angular/blob/master/bower.json)
+
+Client-side (browser) dependencies.
+
+#### [gulpfile.js](https://github.com/paislee/healthy-gulp-angular/blob/master/gulpfile.js)
+
+Where all the Gulp streams and tasks are specified. Tasks are outlined below. This file is discussed in detail in the [blog post](http://paislee.io/a-healthy-gulp-setup-for-angularjs-projects).
 
 #### [/app](https://github.com/paislee/healthy-gulp-angular/blob/master/app)
 

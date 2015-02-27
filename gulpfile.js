@@ -1,7 +1,7 @@
 var gulp = require('gulp');
-var del = require('del');
-var es = require('event-stream')
 var plugins = require('gulp-load-plugins')();
+var del = require('del');
+var es = require('event-stream');
 var bowerFiles = require('main-bower-files');
 var print = require('gulp-print');
 var Q = require('q');
@@ -23,11 +23,11 @@ var paths = {
 
 var pipes = {};
 
-pipes.orderVendorScripts = function() {
+pipes.orderedVendorScripts = function() {
     return plugins.order(['jquery.js', 'angular.js']);
 };
 
-pipes.orderAppScripts = function() {
+pipes.orderedAppScripts = function() {
     return plugins.angularFilesort();
 };
 
@@ -53,10 +53,10 @@ pipes.builtAppScriptsProd = function() {
     var validatedAppScripts = pipes.validatedAppScripts();
 
     return es.merge(scriptedPartials, validatedAppScripts)
-        .pipe(pipes.orderAppScripts())
+        .pipe(pipes.orderedAppScripts())
         .pipe(plugins.sourcemaps.init())
             .pipe(plugins.concat('app.min.js'))
-            //.pipe(plugins.uglify())
+            .pipe(plugins.uglify())
         .pipe(plugins.sourcemaps.write())
         .pipe(gulp.dest(paths.distScriptsProd));
 };
@@ -68,8 +68,7 @@ pipes.builtVendorScriptsDev = function() {
 
 pipes.builtVendorScriptsProd = function() {
     return gulp.src(bowerFiles())
-        .pipe(print())
-        .pipe(pipes.orderVendorScripts())
+        .pipe(pipes.orderedVendorScripts())
         .pipe(plugins.concat('vendor.min.js'))
         .pipe(plugins.uglify())
         .pipe(gulp.dest(paths.distScriptsProd));
@@ -126,10 +125,10 @@ pipes.validatedIndex = function() {
 pipes.builtIndexDev = function() {
 
     var orderedVendorScripts = pipes.builtVendorScriptsDev()
-        .pipe(pipes.orderVendorScripts());
+        .pipe(pipes.orderedVendorScripts());
 
     var orderedAppScripts = pipes.builtAppScriptsDev()
-        .pipe(pipes.orderAppScripts());
+        .pipe(pipes.orderedAppScripts());
 
     var appStyles = pipes.builtStylesDev();
 
