@@ -11,6 +11,7 @@ var Q = require('q');
 var paths = {
     scripts: 'app/**/*.js',
     styles: ['./app/**/*.css', './app/**/*.scss'],
+    images: './images/**/*',
     index: './app/index.html',
     partials: ['app/**/*.html', '!app/index.html'],
     distDev: './dist.dev',
@@ -116,6 +117,16 @@ pipes.builtStylesProd = function() {
         .pipe(gulp.dest(paths.distProd));
 };
 
+pipes.processedImagesDev = function() {
+    return gulp.src(paths.images)
+        .pipe(gulp.dest(paths.distDev + '/images/'));
+};
+
+pipes.processedImagesProd = function() {
+    return gulp.src(paths.images)
+        .pipe(gulp.dest(paths.distProd + '/images/'));
+
+
 pipes.validatedIndex = function() {
     return gulp.src(paths.index)
         .pipe(plugins.htmlhint())
@@ -156,11 +167,11 @@ pipes.builtIndexProd = function() {
 };
 
 pipes.builtAppDev = function() {
-    return es.merge(pipes.builtIndexDev(), pipes.builtPartialsDev());
+    return es.merge(pipes.builtIndexDev(), pipes.builtPartialsDev(), pipes.processedImagesDev());
 };
 
 pipes.builtAppProd = function() {
-    return pipes.builtIndexProd();
+    return es.merge(pipes.builtIndexProd(), pipes.processedImagesProd());
 };
 
 // == TASKS ========
