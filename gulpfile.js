@@ -249,11 +249,11 @@ gulp.task('clean-build-app-dev', ['clean-dev'], pipes.builtAppDev);
 gulp.task('clean-build-app-prod', ['clean-prod'], pipes.builtAppProd);
 
 // clean, build, and watch live changes to the dev environment
-gulp.task('watch-dev', ['clean-build-app-dev'], function() {
+gulp.task('watch-dev', ['clean-build-app-dev', 'validate-devserver-scripts'], function() {
 
     // start nodemon to auto-reload the dev server
     plugins.nodemon({ script: 'server.js', ext: 'js', watch: ['devServer/'], env: {NODE_ENV : 'development'} })
-        .on('change', ['jshint-devserver'])
+        .on('change', ['validate-devserver-scripts'])
         .on('restart', function () {
             console.log('[nodemon] restarted dev server');
         });
@@ -288,11 +288,11 @@ gulp.task('watch-dev', ['clean-build-app-dev'], function() {
 });
 
 // clean, build, and watch live changes to the prod environment
-gulp.task('watch-prod', ['clean-build-app-prod'], function() {
+gulp.task('watch-prod', ['clean-build-app-prod', 'validate-devserver-scripts'], function() {
 
     // start nodemon to auto-reload the dev server
     plugins.nodemon({ script: 'server.js', ext: 'js', watch: ['devServer/'], env: {NODE_ENV : 'production'} })
-        .on('change', ['jshint-devserver'])
+        .on('change', ['validate-devserver-scripts'])
         .on('restart', function () {
             console.log('[nodemon] restarted dev server');
         });
