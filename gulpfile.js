@@ -125,7 +125,7 @@ pipes.processedImagesDev = function() {
 pipes.processedImagesProd = function() {
     return gulp.src(paths.images)
         .pipe(gulp.dest(paths.distProd + '/images/'));
-
+};
 
 pipes.validatedIndex = function() {
     return gulp.src(paths.index)
