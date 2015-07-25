@@ -1,4 +1,4 @@
-angular.module('healthyGulpAngularApp', ['ui.router'])
+angular.module('healthyGulpAngularApp', ['ui.router', 'healthyGulpAngularAppComponents'])
 
 .config(['$stateProvider', '$urlRouterProvider',
     function($stateProvider, $urlRouterProvider) {
