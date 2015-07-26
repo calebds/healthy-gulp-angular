@@ -21,6 +21,9 @@ var paths = {
     scriptsDevServer: 'devServer/**/*.js'
 };
 
+var vendorScriptsRegex =  /.js$/i;
+var vendorStylesRegex = /.css$/i;
+
 // == PIPE SEGMENTS ========
 
 var pipes = {};
@@ -81,7 +84,10 @@ pipes.builtVendorScriptsDev = function() {
 };
 
 pipes.builtVendorScriptsProd = function() {
-    return gulp.src(bowerFiles())
+    return gulp.src(bowerFiles({
+                filter: function(e) { return vendorScriptsRegex.test(e); }
+            })
+        )
         .pipe(pipes.orderedVendorScripts())
         .pipe(plugins.concat('vendor.min.js'))
         .pipe(plugins.uglify())
@@ -120,6 +126,16 @@ pipes.builtStylesDev = function() {
         .pipe(gulp.dest(paths.distDev));
 };
 
+pipes.builtVendorStyles = function() {
+    return gulp.src(bowerFiles({
+                filter: function(e) { return vendorStylesRegex.test(e); }
+            })
+        )
+        .pipe(plugins.concat('vendor.min.css'))
+        .pipe(plugins.minifyCss())
+        .pipe(gulp.dest(paths.distProd + "/styles"));
+}
+
 pipes.builtStylesProd = function() {
     return gulp.src(paths.styles)
         .pipe(plugins.sourcemaps.init())
@@ -128,6 +144,14 @@ pipes.builtStylesProd = function() {
         .pipe(plugins.sourcemaps.write())
         .pipe(pipes.minifiedFileName())
         .pipe(gulp.dest(paths.distProd));
+};
+
+pipes.processedFonts = function(base_path) {
+    return gulp.src('./bower_components/**/*.{ttf,woff,eof,svg,woff2}')
+        .pipe(plugins.rename(function (path) {
+            path.dirname = "/";
+          }))
+        .pipe(gulp.dest(base_path + '/fonts'));
 };
 
 pipes.processedImagesDev = function() {
@@ -169,22 +193,24 @@ pipes.builtIndexProd = function() {
     var vendorScripts = pipes.builtVendorScriptsProd();
     var appScripts = pipes.builtAppScriptsProd();
     var appStyles = pipes.builtStylesProd();
+    var vendorStyles = pipes.builtVendorStyles();
 
     return pipes.validatedIndex()
         .pipe(gulp.dest(paths.distProd)) // write first to get relative path for inject
         .pipe(plugins.inject(vendorScripts, {relative: true, name: 'bower'}))
         .pipe(plugins.inject(appScripts, {relative: true}))
         .pipe(plugins.inject(appStyles, {relative: true}))
+        .pipe(plugins.inject(vendorStyles, {relative: true, name: 'bower'}))
         .pipe(plugins.htmlmin({collapseWhitespace: true, removeComments: true}))
         .pipe(gulp.dest(paths.distProd));
 };
 
 pipes.builtAppDev = function() {
-    return es.merge(pipes.builtIndexDev(), pipes.builtPartialsDev(), pipes.processedImagesDev());
+    return es.merge(pipes.builtIndexDev(), pipes.builtPartialsDev(), pipes.processedFonts(paths.distDev), pipes.processedImagesDev());
 };
 
 pipes.builtAppProd = function() {
-    return es.merge(pipes.builtIndexProd(), pipes.processedImagesProd());
+    return es.merge(pipes.builtIndexProd(), pipes.processedFonts(paths.distProd), pipes.processedImagesProd());
 };
 
 // == TASKS ========
