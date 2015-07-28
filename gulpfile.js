@@ -20,8 +20,9 @@ var paths = {
     scriptsDevServer: 'devServer/**/*.js'
 };
 
-var vendorScriptsRegex =  /.js$/i;
-var vendorStylesRegex = /.css$/i;
+var jsScriptsRegex =  /.js$/i;
+var cssStylesRegex = /.css$/i;
+var lessStylesRegex = /.less$/i;
 
 // == PIPE SEGMENTS ========
 
@@ -66,13 +67,16 @@ pipes.builtAppScriptsProd = function() {
 };
 
 pipes.builtVendorScriptsDev = function() {
-    return gulp.src(bowerFiles())
+    return gulp.src(bowerFiles({
+                filter: function(e) { return jsScriptsRegex.test(e); }
+            })
+        )
         .pipe(gulp.dest('dist.dev/bower_components'));
 };
 
 pipes.builtVendorScriptsProd = function() {
     return gulp.src(bowerFiles({
-                filter: function(e) { return vendorScriptsRegex.test(e); }
+                filter: function(e) { return jsScriptsRegex.test(e); }
             })
         )
         .pipe(pipes.orderedVendorScripts())
@@ -113,11 +117,29 @@ pipes.builtStylesDev = function() {
         .pipe(gulp.dest(paths.distDev));
 };
 
-pipes.builtVendorStyles = function() {
+pipes.buildVendorStylesLess = function() {
     return gulp.src(bowerFiles({
-                filter: function(e) { return vendorStylesRegex.test(e); }
+                filter: function(e) { return lessStylesRegex.test(e); }
             })
         )
+        .pipe(plugins.less({ })
+        )
+}
+
+pipes.builtVendorCssStyles = function() {
+    return gulp.src(bowerFiles({
+                filter: function(e) { return cssStylesRegex.test(e); }
+            })
+        )
+}
+
+pipes.builtVendorStylesDev = function() {
+    return es.merge( pipes.buildVendorStylesLess(), pipes.builtVendorCssStyles() )
+        .pipe(gulp.dest(paths.distDev + "/styles" ) );
+}
+
+pipes.builtVendorStylesProd = function() {
+    return es.merge( pipes.buildVendorStylesLess(), pipes.builtVendorCssStyles() )
         .pipe(plugins.concat('vendor.min.css'))
         .pipe(plugins.minifyCss())
         .pipe(gulp.dest(paths.distProd + "/styles"));
@@ -166,12 +188,14 @@ pipes.builtIndexDev = function() {
         .pipe(pipes.orderedAppScripts());
 
     var appStyles = pipes.builtStylesDev();
+    var vendorStyles = pipes.builtVendorStylesDev();
 
     return pipes.validatedIndex()
         .pipe(gulp.dest(paths.distDev)) // write first to get relative path for inject
         .pipe(plugins.inject(orderedVendorScripts, {relative: true, name: 'bower'}))
         .pipe(plugins.inject(orderedAppScripts, {relative: true}))
         .pipe(plugins.inject(appStyles, {relative: true}))
+        .pipe(plugins.inject(vendorStyles, {relative: true, name: 'bower'}))
         .pipe(gulp.dest(paths.distDev));
 };
 
@@ -180,7 +204,7 @@ pipes.builtIndexProd = function() {
     var vendorScripts = pipes.builtVendorScriptsProd();
     var appScripts = pipes.builtAppScriptsProd();
     var appStyles = pipes.builtStylesProd();
-    var vendorStyles = pipes.builtVendorStyles();
+    var vendorStyles = pipes.builtVendorStylesProd();
 
     return pipes.validatedIndex()
         .pipe(gulp.dest(paths.distProd)) // write first to get relative path for inject
