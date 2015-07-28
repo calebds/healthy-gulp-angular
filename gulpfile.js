@@ -280,6 +280,12 @@ gulp.task('watch-dev', ['clean-build-app-dev', 'validate-devserver-scripts'], fu
             .pipe(plugins.livereload());
     });
 
+    // watch app coffee scripts
+    gulp.watch(paths.coffee_scripts, function() {
+        return pipes.builtAppScriptsDev()
+            .pipe(plugins.livereload());
+    });
+
     // watch app scripts
     gulp.watch(paths.scripts, function() {
         return pipes.builtAppScriptsDev()
@@ -316,6 +322,12 @@ gulp.task('watch-prod', ['clean-build-app-prod', 'validate-devserver-scripts'], 
     // watch index
     gulp.watch(paths.index, function() {
         return pipes.builtIndexProd()
+            .pipe(plugins.livereload());
+    });
+
+    // watch app coffee scripts
+    gulp.watch(paths.coffee_scripts, function() {
+        return pipes.builtAppScriptsProd()
             .pipe(plugins.livereload());
     });
 
