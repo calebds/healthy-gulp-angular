@@ -23,6 +23,7 @@ var paths = {
 var jsScriptsRegex =  /.js$/i;
 var cssStylesRegex = /.css$/i;
 var lessStylesRegex = /.less$/i;
+var fontsStylesRegex = /.(ttf|woff|eot|svg|woff2)$/i;
 
 // == PIPE SEGMENTS ========
 
@@ -156,11 +157,22 @@ pipes.builtStylesProd = function() {
 };
 
 pipes.processedFonts = function(base_path) {
-    return gulp.src('./bower_components/**/*.{ttf,woff,eof,svg,woff2}')
+    return gulp.src(bowerFiles({
+                filter: function(e) { return fontsStylesRegex.test(e); }
+            }),
+            {base : 'bower_components'}
+        )
         .pipe(plugins.rename(function (path) {
-            path.dirname = "/";
+            var arrayPath = path.dirname.split("/");
+            if (arrayPath.length > 1) {
+                arrayPath.splice(0,1);
+                new_path = "../" + arrayPath.join('/');
+            }  else {
+                new_path = "./"
+            }
+            path.dirname = new_path;
           }))
-        .pipe(gulp.dest(base_path + '/fonts'));
+        .pipe(gulp.dest(base_path + "/styles"));
 };
 
 pipes.processedImagesDev = function() {
