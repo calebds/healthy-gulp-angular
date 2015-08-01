@@ -138,7 +138,7 @@ pipes.scriptedPartialsProd = function() {
         }))
         .pipe(plugins.concat('templates.min.js'))
         .pipe(plugins.uglify())
-        .pipe(gulp.dest(paths.distProd ));
+        .pipe(gulp.dest(paths.distScriptsProd));
 };
 
 pipes.builtStylesDev = function() {
