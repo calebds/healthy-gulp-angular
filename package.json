@@ -1,8 +1,8 @@
 {
   "name": "healthy-gulp-angular",
   "private": true,
-  "version": "0.2.0-SNAPSHOT",
-  "repository": "", 
+  "version": "0.2.0",
+  "repository": "",
   "devDependencies": {
     "body-parser": "^1.5.2",
     "bower": "^1.3.1",
