@@ -1,3 +1,5 @@
+// Gulpfile v0.2.0
+
 var gulp = require('gulp');
 var plugins = require('gulp-load-plugins')();
 var del = require('del');
@@ -24,6 +26,7 @@ var paths = {
 var jsScriptsRegex =  /.js$/i;
 var cssStylesRegex = /.css$/i;
 var lessStylesRegex = /.less$/i;
+var fontsStylesRegex = /.(ttf|woff|eot|svg|woff2)$/i;
 
 // == PIPE SEGMENTS ========
 
@@ -48,13 +51,15 @@ pipes.compiledAppCS = function() {
         .pipe(plugins.sourcemaps.init())
         .pipe(plugins.coffee({bare: true})
             .on('error', plugins.util.log))
-        .pipe(plugins.sourcemaps.write());
+        .pipe(plugins.sourcemaps.write())
+        .pipe(gulp.dest(paths.distDev));
 };
 
 pipes.validatedAppScripts = function() {
     return gulp.src(paths.scripts)
         .pipe(plugins.jshint())
-        .pipe(plugins.jshint.reporter('jshint-stylish'));
+        .pipe(plugins.jshint.reporter('jshint-stylish'))
+        .pipe(gulp.dest(paths.distDev));
 };
 
 pipes.builtAppScriptsDev = function() {
@@ -66,11 +71,10 @@ pipes.builtAppScriptsDev = function() {
 };
 
 pipes.builtAppScriptsProd = function() {
-    var scriptedPartials = pipes.scriptedPartials();
     var compiledAppCS = pipes.compiledAppCS();
     var validatedAppScripts = pipes.validatedAppScripts();
 
-    return es.merge(scriptedPartials, validatedAppScripts, compiledAppCS)
+    return es.merge(validatedAppScripts, compiledAppCS)
         .pipe(pipes.orderedAppScripts())
         .pipe(plugins.sourcemaps.init())
             .pipe(plugins.concat('app.min.js'))
@@ -115,13 +119,26 @@ pipes.builtPartialsDev = function() {
         .pipe(gulp.dest(paths.distDev));
 };
 
-pipes.scriptedPartials = function() {
+pipes.scriptedPartialsDev = function() {
     return pipes.validatedPartials()
         .pipe(plugins.htmlhint.failReporter())
         .pipe(plugins.htmlmin({collapseWhitespace: true, removeComments: true}))
         .pipe(plugins.ngHtml2js({
             moduleName: "healthyGulpAngularAppComponents"
-        }));
+        }))
+        .pipe(gulp.dest(paths.distDev + "/templates"));
+};
+
+pipes.scriptedPartialsProd = function() {
+    return pipes.validatedPartials()
+        .pipe(plugins.htmlhint.failReporter())
+        .pipe(plugins.htmlmin({collapseWhitespace: true, removeComments: true}))
+        .pipe(plugins.ngHtml2js({
+            moduleName: "healthyGulpAngularAppComponents"
+        }))
+        .pipe(plugins.concat('templates.min.js'))
+        .pipe(plugins.uglify())
+        .pipe(gulp.dest(paths.distScriptsProd));
 };
 
 pipes.builtStylesDev = function() {
@@ -169,11 +186,22 @@ pipes.builtStylesProd = function() {
 };
 
 pipes.processedFonts = function(base_path) {
-    return gulp.src('./bower_components/**/*.{ttf,woff,eof,svg,woff2}')
+    return gulp.src(bowerFiles({
+                filter: function(e) { return fontsStylesRegex.test(e); }
+            }),
+            {base : 'bower_components'}
+        )
         .pipe(plugins.rename(function (path) {
-            path.dirname = "/";
+            var arrayPath = path.dirname.split("/");
+            if (arrayPath.length > 1) {
+                arrayPath.splice(0,1);
+                new_path = "../" + arrayPath.join('/');
+            }  else {
+                new_path = "./"
+            }
+            path.dirname = new_path;
           }))
-        .pipe(gulp.dest(base_path + '/fonts'));
+        .pipe(gulp.dest(base_path + "/styles"));
 };
 
 pipes.processedImagesDev = function() {
@@ -200,12 +228,15 @@ pipes.builtIndexDev = function() {
     var orderedAppScripts = pipes.builtAppScriptsDev()
         .pipe(pipes.orderedAppScripts());
 
+    var scriptedPartialsDev = pipes.scriptedPartialsDev();
+
     var appStyles = pipes.builtStylesDev();
     var vendorStyles = pipes.builtVendorStylesDev();
 
     return pipes.validatedIndex()
         .pipe(gulp.dest(paths.distDev)) // write first to get relative path for inject
         .pipe(plugins.inject(orderedVendorScripts, {relative: true, name: 'bower'}))
+        .pipe(plugins.inject(scriptedPartialsDev, {relative: true, name: 'templates'}))
         .pipe(plugins.inject(orderedAppScripts, {relative: true}))
         .pipe(plugins.inject(appStyles, {relative: true}))
         .pipe(plugins.inject(vendorStyles, {relative: true, name: 'bower'}))
@@ -215,6 +246,7 @@ pipes.builtIndexDev = function() {
 pipes.builtIndexProd = function() {
 
     var vendorScripts = pipes.builtVendorScriptsProd();
+    var scriptedPartialsProd = pipes.scriptedPartialsProd();
     var appScripts = pipes.builtAppScriptsProd();
     var appStyles = pipes.builtStylesProd();
     var vendorStyles = pipes.builtVendorStylesProd();
@@ -222,6 +254,7 @@ pipes.builtIndexProd = function() {
     return pipes.validatedIndex()
         .pipe(gulp.dest(paths.distProd)) // write first to get relative path for inject
         .pipe(plugins.inject(vendorScripts, {relative: true, name: 'bower'}))
+        .pipe(plugins.inject(scriptedPartialsProd, {relative: true, name: 'templates'}))
         .pipe(plugins.inject(appScripts, {relative: true}))
         .pipe(plugins.inject(appStyles, {relative: true}))
         .pipe(plugins.inject(vendorStyles, {relative: true, name: 'bower'}))
@@ -230,7 +263,7 @@ pipes.builtIndexProd = function() {
 };
 
 pipes.builtAppDev = function() {
-    return es.merge(pipes.builtIndexDev(), pipes.builtPartialsDev(), pipes.processedFonts(paths.distDev), pipes.processedImagesDev());
+    return es.merge(pipes.builtIndexDev(), pipes.processedFonts(paths.distDev), pipes.processedImagesDev());
 };
 
 pipes.builtAppProd = function() {
@@ -267,7 +300,7 @@ gulp.task('validate-index', pipes.validatedIndex);
 gulp.task('build-partials-dev', pipes.builtPartialsDev);
 
 // converts partials to javascript using html2js
-gulp.task('convert-partials-to-js', pipes.scriptedPartials);
+gulp.task('convert-partials-to-js', pipes.scriptedPartialsDev);
 
 // runs jshint on the dev server scripts
 gulp.task('validate-devserver-scripts', pipes.validatedDevServerScripts);
@@ -344,7 +377,7 @@ gulp.task('watch-dev', ['clean-build-app-dev', 'validate-devserver-scripts'], fu
 
     // watch html partials
     gulp.watch(paths.partials, function() {
-        return pipes.builtPartialsDev()
+        return pipes.scriptedPartialsDev()
             .pipe(plugins.livereload());
     });
 
@@ -389,7 +422,7 @@ gulp.task('watch-prod', ['clean-build-app-prod', 'validate-devserver-scripts'], 
 
     // watch hhtml partials
     gulp.watch(paths.partials, function() {
-        return pipes.builtAppScriptsProd()
+        return pipes.scriptedPartialsProd()
             .pipe(plugins.livereload());
     });
 
