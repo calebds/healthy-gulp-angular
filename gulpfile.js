@@ -247,7 +247,7 @@ pipes.builtIndexProd = function() {
 };
 
 pipes.builtAppDev = function() {
-    return es.merge(pipes.builtIndexDev(), pipes.builtPartialsDev(), pipes.processedFonts(paths.distDev), pipes.processedImagesDev());
+    return es.merge(pipes.builtIndexDev(), pipes.processedFonts(paths.distDev), pipes.processedImagesDev());
 };
 
 pipes.builtAppProd = function() {
