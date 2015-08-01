@@ -51,20 +51,23 @@ pipes.compiledAppCS = function() {
         .pipe(plugins.sourcemaps.init())
         .pipe(plugins.coffee({bare: true})
             .on('error', plugins.util.log))
-        .pipe(plugins.sourcemaps.write());
+        .pipe(plugins.sourcemaps.write())
+        .pipe(gulp.dest(paths.distDev));
 };
 
 pipes.validatedAppScripts = function() {
     return gulp.src(paths.scripts)
         .pipe(plugins.jshint())
-        .pipe(plugins.jshint.reporter('jshint-stylish'));
+        .pipe(plugins.jshint.reporter('jshint-stylish'))
+        .pipe(gulp.dest(paths.distDev));
 };
 
 pipes.builtAppScriptsDev = function() {
     var compiledAppCS = pipes.compiledAppCS();
     var validatedAppScripts = pipes.validatedAppScripts();
+    var scriptedPartials = pipes.scriptedPartials();
 
-    return es.merge(compiledAppCS, validatedAppScripts)
+    return es.merge(scriptedPartials, compiledAppCS, validatedAppScripts)
         .pipe(gulp.dest(paths.distDev));
 };
 
@@ -124,7 +127,8 @@ pipes.scriptedPartials = function() {
         .pipe(plugins.htmlmin({collapseWhitespace: true, removeComments: true}))
         .pipe(plugins.ngHtml2js({
             moduleName: "healthyGulpAngularAppComponents"
-        }));
+        }))
+        .pipe(gulp.dest(paths.distDev + "/templates"));
 };
 
 pipes.builtStylesDev = function() {
@@ -211,10 +215,7 @@ pipes.builtIndexDev = function() {
     var orderedVendorScripts = pipes.builtVendorScriptsDev()
         .pipe(pipes.orderedVendorScripts());
 
-    var scriptedPartials = pipes.scriptedPartials()
-        .pipe(gulp.dest(paths.distDev + "/templates"));
-
-    var orderedAppScripts = es.merge( scriptedPartials, pipes.builtAppScriptsDev())
+    var orderedAppScripts = pipes.builtAppScriptsDev()
         .pipe(pipes.orderedAppScripts());
 
     var appStyles = pipes.builtStylesDev();
@@ -361,7 +362,7 @@ gulp.task('watch-dev', ['clean-build-app-dev', 'validate-devserver-scripts'], fu
 
     // watch html partials
     gulp.watch(paths.partials, function() {
-        return pipes.builtPartialsDev()
+        return pipes.builtAppScriptsDev()
             .pipe(plugins.livereload());
     });
 
