@@ -1,3 +1,5 @@
+// Gulpfile v0.2.0-SNAPSHOT
+
 var gulp = require('gulp');
 var plugins = require('gulp-load-plugins')();
 var del = require('del');
@@ -209,7 +211,10 @@ pipes.builtIndexDev = function() {
     var orderedVendorScripts = pipes.builtVendorScriptsDev()
         .pipe(pipes.orderedVendorScripts());
 
-    var orderedAppScripts = pipes.builtAppScriptsDev()
+    var scriptedPartials = pipes.scriptedPartials()
+        .pipe(gulp.dest(paths.distDev + "/templates"));
+
+    var orderedAppScripts = es.merge( scriptedPartials, pipes.builtAppScriptsDev())
         .pipe(pipes.orderedAppScripts());
 
     var appStyles = pipes.builtStylesDev();
