@@ -9,6 +9,7 @@ var Q = require('q');
 // == PATH STRINGS ========
 
 var paths = {
+    coffee_scripts: 'app/**/*.coffee',
     scripts: 'app/**/*.js',
     styles: ['./app/**/*.css', './app/**/*.scss'],
     images: './images/**/*',
@@ -38,6 +39,14 @@ pipes.minifiedFileName = function() {
     });
 };
 
+pipes.compiledAppCS = function() {
+    return gulp.src(paths.coffee_scripts)
+        .pipe(plugins.sourcemaps.init())
+        .pipe(plugins.coffee({bare: true})
+            .on('error', plugins.util.log))
+        .pipe(plugins.sourcemaps.write());
+};
+
 pipes.validatedAppScripts = function() {
     return gulp.src(paths.scripts)
         .pipe(plugins.jshint())
@@ -45,15 +54,19 @@ pipes.validatedAppScripts = function() {
 };
 
 pipes.builtAppScriptsDev = function() {
-    return pipes.validatedAppScripts()
+    var compiledAppCS = pipes.compiledAppCS();
+    var validatedAppScripts = pipes.validatedAppScripts();
+
+    return es.merge(compiledAppCS, validatedAppScripts)
         .pipe(gulp.dest(paths.distDev));
 };
 
 pipes.builtAppScriptsProd = function() {
     var scriptedPartials = pipes.scriptedPartials();
+    var compiledAppCS = pipes.compiledAppCS();
     var validatedAppScripts = pipes.validatedAppScripts();
 
-    return es.merge(scriptedPartials, validatedAppScripts)
+    return es.merge(scriptedPartials, validatedAppScripts, compiledAppCS)
         .pipe(pipes.orderedAppScripts())
         .pipe(plugins.sourcemaps.init())
             .pipe(plugins.concat('app.min.js'))
@@ -97,7 +110,7 @@ pipes.scriptedPartials = function() {
         .pipe(plugins.htmlhint.failReporter())
         .pipe(plugins.htmlmin({collapseWhitespace: true, removeComments: true}))
         .pipe(plugins.ngHtml2js({
-            moduleName: "healthyGulpAngularApp"
+            moduleName: "healthyGulpAngularAppComponents"
         }));
 };
 
@@ -267,6 +280,12 @@ gulp.task('watch-dev', ['clean-build-app-dev', 'validate-devserver-scripts'], fu
             .pipe(plugins.livereload());
     });
 
+    // watch app coffee scripts
+    gulp.watch(paths.coffee_scripts, function() {
+        return pipes.builtAppScriptsDev()
+            .pipe(plugins.livereload());
+    });
+
     // watch app scripts
     gulp.watch(paths.scripts, function() {
         return pipes.builtAppScriptsDev()
@@ -303,6 +322,12 @@ gulp.task('watch-prod', ['clean-build-app-prod', 'validate-devserver-scripts'], 
     // watch index
     gulp.watch(paths.index, function() {
         return pipes.builtIndexProd()
+            .pipe(plugins.livereload());
+    });
+
+    // watch app coffee scripts
+    gulp.watch(paths.coffee_scripts, function() {
+        return pipes.builtAppScriptsProd()
             .pipe(plugins.livereload());
     });
 

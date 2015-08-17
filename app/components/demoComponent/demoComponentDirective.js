@@ -1,6 +1,10 @@
-angular.module('healthyGulpAngularApp')
+try {
+  module = angular.module('healthyGulpAngularAppComponents');
+} catch (e) {
+  module = angular.module('healthyGulpAngularAppComponents', []);
+}
 
-.directive('demoComponent', [function() {
+module.directive('demoComponent', [function() {
         return {
             restrict: 'A',
             templateUrl: 'components/demoComponent/demoComponent.html'
