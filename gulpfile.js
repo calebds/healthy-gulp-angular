@@ -5,6 +5,7 @@ var es = require('event-stream');
 var bowerFiles = require('main-bower-files');
 var print = require('gulp-print');
 var Q = require('q');
+var streamqueue = require('streamqueue');
 
 // == PATH STRINGS ========
 
@@ -53,8 +54,8 @@ pipes.builtAppScriptsProd = function() {
     var scriptedPartials = pipes.scriptedPartials();
     var validatedAppScripts = pipes.validatedAppScripts();
 
-    return es.merge(scriptedPartials, validatedAppScripts)
-        .pipe(pipes.orderedAppScripts())
+    return streamqueue({ objectMode: true }, validatedAppScripts, scriptedPartials)
+        // .pipe(pipes.orderedAppScripts())
         .pipe(plugins.sourcemaps.init())
             .pipe(plugins.concat('app.min.js'))
             .pipe(plugins.uglify())
