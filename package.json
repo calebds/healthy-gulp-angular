@@ -34,7 +34,8 @@
     "method-override": "^2.1.2",
     "protractor": "^1.1.1",
     "q": "^1.1.2",
-    "shelljs": "^0.2.6"
+    "shelljs": "^0.2.6",
+    "streamqueue": "^1.1.1"
   },
   "scripts": {
     "postinstall": "bower install",
