@@ -23,10 +23,10 @@ var paths = {
     scriptsDevServer: 'devServer/**/*.js'
 };
 
-var jsScriptsRegex =  /.js$/i;
-var cssStylesRegex = /.css$/i;
-var lessStylesRegex = /.less$/i;
-var fontsStylesRegex = /.(ttf|woff|eot|svg|woff2)$/i;
+var jsScriptsRegex =  /\.js$/i;
+var cssStylesRegex = /\.css$/i;
+var lessStylesRegex = /\.less$/i;
+var fontsStylesRegex = /\.(ttf|woff|eot|svg|woff2)$/i;
 
 // == PIPE SEGMENTS ========
 
